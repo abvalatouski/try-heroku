@@ -1,5 +1,8 @@
-.env
-db/.env
+.git
+.gitignore
+
+.env.sample
+db/.env.sample
 
 # IDE.
 .vscode

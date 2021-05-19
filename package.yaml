@@ -12,6 +12,7 @@ executables:
       - blaze-html
       - bytestring
       - http-types
+      - postgresql-simple
       - text
       - wai
       - wai-extra

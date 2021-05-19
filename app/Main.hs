@@ -1,7 +1,9 @@
 import           Control.Monad
-import           Data.IORef
+import           Data.String
 import           System.Environment
+import           Text.Printf
 
+import           Data.ByteString               (ByteString)
 import           Data.Text                     (Text)
 import qualified Data.Text                     as Text
 import qualified Data.Text.Encoding            as Text
@@ -10,6 +12,7 @@ import qualified Network.Wai                   as Web
 import qualified Network.Wai.Handler.Warp      as Web
 import qualified Network.Wai.Middleware.Static as Web
 import qualified Network.Wai.Parse             as Web
+import qualified Database.PostgreSQL.Simple    as DB
 import qualified Text.Blaze.Html.Renderer.Utf8 as Html
 import           Text.Blaze.Html5              ((!))
 import qualified Text.Blaze.Html5              as Html
@@ -17,23 +20,22 @@ import qualified Text.Blaze.Html5.Attributes   as Html hiding (title, form)
 
 main :: IO ()
 main = do
-    port  <- read <$> getEnv "PORT"
-    state <- newIORef $ AppState [Todo "Add some todos."]
-    Web.run port $ Web.static $ app state
+    port <- read <$> getEnv "PORT"
+    conn <- connectToDB
+    Web.run port $ Web.static $ app conn
 
-app :: IORef AppState -> Web.Application
-app state request respond = do
+app :: DB.Connection -> Web.Application
+app conn request respond = do
     when (Web.requestMethod request == "POST") do
         param <- lookup "text" . fst <$> Web.parseRequestBody (\_ _ _ -> pure ()) request
         case param of
             Just param -> do
                 let todo = Todo $ Text.decodeUtf8 param
-                modifyIORef' state \(AppState todos) ->
-                    AppState $ todo : todos
+                addTodo todo conn
             Nothing ->
                 pure ()
 
-    AppState todos <- readIORef state
+    todos <- getAllTodos conn
     respond $ Web.responseBuilder
         Http.status200
         [("Content-Type", "text/html")] 
@@ -69,3 +71,25 @@ page todos = do
                     Html.li ! Html.class_ "todo__item" $
                         Html.div ! Html.class_ "add" $
                             Html.text todo
+
+-- Dealing with database.
+
+connectToDB :: IO DB.Connection
+connectToDB = DB.connectPostgreSQL =<< mkConnectionString
+
+mkConnectionString :: IO ByteString
+mkConnectionString = fmap fromString $
+    printf "host='%s' port=%s dbname='%s' user='%s' password='%s'"
+        <$> getEnv "DB_HOST"
+        <*> getEnv "DB_PORT"
+        <*> getEnv "DB_NAME"
+        <*> getEnv "DB_USER"
+        <*> getEnv "DB_PASSWORD"
+
+addTodo :: Todo -> DB.Connection -> IO ()
+addTodo (Todo todo) conn =
+    void $ DB.execute conn "INSERT INTO public.todos (todo) VALUES (?);" (DB.Only todo)
+
+getAllTodos :: DB.Connection -> IO [Todo]
+getAllTodos conn =
+    fmap (Todo . DB.fromOnly) <$> DB.query_ conn "SELECT todo FROM public.todos;"
