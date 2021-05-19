@@ -4,10 +4,12 @@ import           System.Environment
 
 import           Data.Text                     (Text)
 import qualified Data.Text                     as Text
+import qualified Data.Text.Encoding            as Text
 import qualified Network.HTTP.Types            as Http
 import qualified Network.Wai                   as Web
 import qualified Network.Wai.Handler.Warp      as Web
 import qualified Network.Wai.Middleware.Static as Web
+import qualified Network.Wai.Parse             as Web
 import qualified Text.Blaze.Html.Renderer.Utf8 as Html
 import           Text.Blaze.Html5              ((!))
 import qualified Text.Blaze.Html5              as Html
@@ -20,7 +22,17 @@ main = do
     Web.run port $ Web.static $ app state
 
 app :: IORef AppState -> Web.Application
-app state  _request respond = do
+app state request respond = do
+    when (Web.requestMethod request == "POST") do
+        param <- lookup "text" . fst <$> Web.parseRequestBody (\_ _ _ -> pure ()) request
+        case param of
+            Just param -> do
+                let todo = Todo $ Text.decodeUtf8 param
+                modifyIORef' state \(AppState todos) ->
+                    AppState $ todo : todos
+            Nothing ->
+                pure ()
+
     AppState todos <- readIORef state
     respond $ Web.responseBuilder
         Http.status200
