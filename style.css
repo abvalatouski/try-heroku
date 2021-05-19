@@ -1,0 +1,144 @@
+/*
+ * Reset.
+ */
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+:focus {
+    outline: none;
+}
+
+html {
+    font-size: 14px;
+}
+
+/*
+ * Styles.
+ */
+
+:root {
+    --primary-color: white;
+    --secondary-color: #E0FFE0;
+    --foreground: black;
+}
+
+body {
+    background-color: var(--primary-color);
+    margin: 0 auto;
+}
+
+.todo__header {
+    font-family: 'Roboto Slab', serif;
+    font-size: 3rem;
+    text-transform: uppercase;
+    color: var(--foreground);
+    text-align: center;
+}
+
+.todo__form {
+    margin: 1rem 0 1rem 0;
+}
+
+.todo__form > * {
+    display: block;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.todo__form > * + * {
+    margin-top: 1rem;
+}
+
+.todo__form > textarea {
+    font-size: 1.25rem;
+    padding: 0.25rem;
+    min-height: 10rem;
+    resize: vertical;
+    width: calc(100% - 2 * (0.25rem + 1px));
+}
+
+.todo__form > button {
+    font-size: 2rem;
+    padding: 0.25rem;
+    width: 100%;
+}
+
+.todo__list {
+    border-top: 0.25rem solid var(--secondary-color);
+    margin-top: 1rem;
+    padding-top: 1rem;
+    list-style-type: none;
+}
+
+.todo__item {
+    background-color: var(--secondary-color);
+    box-shadow: 0 0 1.5rem var(--secondary-color);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.25rem;
+    color: var(--foreground);
+    display: flex;
+}
+
+.todo__item + .todo__item {
+    margin-top: 1.25rem;
+}
+
+.add {
+    padding: 1rem;
+    border-radius: 0.5rem 0 0 0.5rem;
+}
+
+/* .remove {
+    display: none;
+    text-decoration: none;
+    background-color: #FF5050;
+    color: #FFFFFF;
+    font-weight: bold;
+    padding: 1rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+    display: grid;
+    place-items: center;
+} */
+
+/*
+ * Adaptibity.
+ */
+
+html {
+    font-size: 11px;
+}
+
+body {
+    width: 80%;
+    padding-top: 2.5rem;
+}
+
+@media (max-width: 576px) {
+    html {
+        font-size: 12px;
+    }
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 13px;
+    }
+
+    body {
+       width: 70%;
+    }
+}
+
+@media (min-width: 992px) {
+    html {
+        font-size: 14px;
+    }
+
+    body {
+        padding-left: 5rem;
+        padding-right: 5rem;
+        width: calc(70ch + 2 * 5rem);
+    }
+}
