@@ -1,7 +1,9 @@
 .git
 .gitignore
 
+.env
 .env.sample
+db/.env
 db/.env.sample
 
 # IDE.
