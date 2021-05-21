@@ -12,8 +12,6 @@ RUN apt-get update \
     postgresql-client \
     libpq-dev
 WORKDIR /opt/try-heroku
-COPY style.css .
-COPY ./db/setup.sh ./db/setup.sql ./
-RUN chmod +x ./setup.sh
+COPY ./style.css ./setup.sql ./
 COPY --from=build /root/.local/bin/todo-list ./
 CMD ["./todo-list"]
