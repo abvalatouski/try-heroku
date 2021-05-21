@@ -26,7 +26,7 @@ setupDB conn = do
 
 data PostgresUrl = PostgresUrl
     { postgresHost     :: String
-    , postgresPort     :: String -- I don't care what port actually is, so I event wont parse it.
+    , postgresPort     :: String -- I don't care what port actually is, so I even wont parse it.
     , postgresUser     :: String
     , postgresPassword :: String
     , postgresPath     :: String
