@@ -1,11 +1,6 @@
 import           Control.Monad
-import           Data.String
 import           System.Environment
-import           Text.Printf
 
-import           Data.ByteString               (ByteString)
-import           Data.Text                     (Text)
-import qualified Data.Text                     as Text
 import qualified Data.Text.Encoding            as Text
 import qualified Network.HTTP.Types            as Http
 import qualified Network.Wai                   as Web
@@ -18,10 +13,14 @@ import           Text.Blaze.Html5              ((!))
 import qualified Text.Blaze.Html5              as Html
 import qualified Text.Blaze.Html5.Attributes   as Html hiding (title, form)
 
+import           DB
+import           Types
+
 main :: IO ()
 main = do
     port <- read <$> getEnv "PORT"
     conn <- connectToDB
+    setupDB conn
     Web.run port $ Web.static $ app conn
 
 app :: DB.Connection -> Web.Application
@@ -41,12 +40,6 @@ app conn request respond = do
         [("Content-Type", "text/html")] 
         (Html.renderHtmlBuilder $ page todos)
 
-newtype AppState = AppState [Todo]
-
-newtype Todo = Todo Text
-
-instance Show Todo where
-    show (Todo todo) = Text.unpack todo
 
 page :: [Todo] -> Html.Markup
 page todos = do
@@ -71,25 +64,3 @@ page todos = do
                     Html.li ! Html.class_ "todo__item" $
                         Html.div ! Html.class_ "add" $
                             Html.text todo
-
--- Dealing with database.
-
-connectToDB :: IO DB.Connection
-connectToDB = DB.connectPostgreSQL =<< mkConnectionString
-
-mkConnectionString :: IO ByteString
-mkConnectionString = fmap fromString $
-    printf "host='%s' port=%s dbname='%s' user='%s' password='%s'"
-        <$> getEnv "DB_HOST"
-        <*> getEnv "DB_PORT"
-        <*> getEnv "DB_NAME"
-        <*> getEnv "DB_USER"
-        <*> getEnv "DB_PASSWORD"
-
-addTodo :: Todo -> DB.Connection -> IO ()
-addTodo (Todo todo) conn =
-    void $ DB.execute conn "INSERT INTO public.todos (todo) VALUES (?);" (DB.Only todo)
-
-getAllTodos :: DB.Connection -> IO [Todo]
-getAllTodos conn =
-    fmap (Todo . DB.fromOnly) <$> DB.query_ conn "SELECT todo FROM public.todos;"

@@ -7,11 +7,15 @@ executables:
   todo-list:
     source-dirs: app
     main:        Main.hs
+    other-modules:
+      - DB
+      - Types
     dependencies:
       - base >= 4.12
       - blaze-html
       - bytestring
       - http-types
+      - parsec
       - postgresql-simple
       - text
       - wai
@@ -20,4 +24,7 @@ executables:
       - warp
     default-extensions:
       - BlockArguments
+      - DerivingStrategies
+      - FlexibleContexts
       - OverloadedStrings
+      - RecordWildCards
