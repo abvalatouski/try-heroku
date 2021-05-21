@@ -16,5 +16,4 @@ COPY style.css .
 COPY ./db/setup.sh ./db/setup.sql ./
 RUN chmod +x ./setup.sh
 COPY --from=build /root/.local/bin/todo-list ./
-EXPOSE 8080
 CMD ["./todo-list"]
